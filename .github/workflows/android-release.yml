@@ -32,9 +32,15 @@ jobs:
           mkdir -p android/app
           if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/ubalkitchen-release.jks
-            echo "✅ Permanent Release Keystore decoded successfully!"
+            echo "✅ Permanent Release Keystore decoded successfully from GitHub Secrets!"
           else
-            echo "⚠️ WARNING: RELEASE_KEYSTORE_BASE64 secret is not configured in GitHub Secrets. Using fallback unsigned build."
+            echo "⚠️ Notice: RELEASE_KEYSTORE_BASE64 secret is not configured in GitHub Secrets yet."
+            echo "Generating instant self-signed release key so APK and AAB build and install right away..."
+            keytool -genkey -v -keystore android/app/ubalkitchen-release.jks \
+              -alias ubalkitchen -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass ubalfallback123 -keypass ubalfallback123 \
+              -dname "CN=Ubal Kitchen, OU=Kitchen, O=UbalKitchen, L=Mumbai, ST=Maharashtra, C=IN"
+            echo "✅ Fallback keystore created successfully."
           fi
 
       - name: 🛠️ Set up Android SDK & Gradle
@@ -43,17 +49,17 @@ jobs:
       - name: 🚀 Build Signed Release AAB and Signed Release APK
         working-directory: ./android
         env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'ubalfallback123' }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'ubalkitchen' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'ubalfallback123' }}
         run: |
           chmod +x gradlew || true
           
           echo "Building Release AAB (for Google Play Store)..."
-          ./gradlew bundleRelease --stacktrace || gradle bundleRelease --stacktrace
+          ./gradlew bundleRelease --stacktrace
           
           echo "Building Release APK (for Direct Phone Install)..."
-          ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
+          ./gradlew assembleRelease --stacktrace
 
       - name: 📦 Upload Google Play Store AAB (Play Store Release File)
         uses: actions/upload-artifact@v4

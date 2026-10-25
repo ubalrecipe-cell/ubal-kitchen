@@ -44,6 +44,17 @@ include(":app")
 `
   );
 
+  // gradle.properties
+  zip.file(
+    'gradle.properties',
+    `org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.enableJetifier=true
+android.nonTransitiveRClass=true
+kotlin.code.style=official
+`
+  );
+
   // app/build.gradle.kts with fixed Release signing config
   zip.file(
     'app/build.gradle.kts',
