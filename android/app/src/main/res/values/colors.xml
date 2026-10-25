@@ -5,4 +5,5 @@
     <color name="accent">#E76F51</color>
     <color name="background">#FAF7F2</color>
     <color name="surface">#FFFFFF</color>
+    <color name="ic_launcher_background">#EA580C</color>
 </resources>

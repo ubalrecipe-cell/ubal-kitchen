@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.55"
+        android:scaleY="0.55"
+        android:translateX="24.3"
+        android:translateY="24.3">
+        <!-- Cooking Pot Base -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M18,36 h72 c2,0 4,2 4,4 v14 c0,22 -16,40 -40,40 s-40,-18 -40,-40 v-14 c0,-2 2,-4 4,-4 z" />
+        <!-- Handles -->
+        <path
+            android:fillColor="#FDBA74"
+            android:pathData="M10,42 h4 v10 h-4 c-3.3,0 -6,-2.7 -6,-6 s2.7,-4 6,-4 z" />
+        <path
+            android:fillColor="#FDBA74"
+            android:pathData="M94,42 h4 c3.3,0 6,1.8 6,4 s-2.7,6 -6,6 h-4 v-10 z" />
+        <!-- Steam waves -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M38,28 C34,22 42,16 38,10" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M54,26 C50,20 58,14 54,8" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M70,28 C66,22 74,16 70,10" />
+    </group>
+</vector>
