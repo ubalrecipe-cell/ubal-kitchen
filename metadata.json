@@ -1,0 +1,6 @@
+{
+  "name": "Ubal Kitchen",
+  "description": "Jo Ghar Mein Hai, Usi Se Kuch Naya! Indian pantry recipe finder with 50+ dishes, step-by-step cooking timer, bilingual Hindi/English, and Google Play release suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

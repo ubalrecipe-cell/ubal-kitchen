@@ -1,0 +1,91 @@
+name: Build & Sign APK and Play Store AAB
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Release Notes (अपडेट विवरण)'
+        required: false
+        default: 'Ubal Kitchen Release with 52+ recipes and smart pantry matching'
+
+jobs:
+  build:
+    name: Build Signed APK & AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: 🔑 Restore Permanent Keystore from Secret
+        # This restores your exact release keystore so the SHA-256 key NEVER changes across builds
+        run: |
+          mkdir -p android/app
+          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/ubalkitchen-release.jks
+            echo "✅ Permanent Release Keystore decoded successfully!"
+          else
+            echo "⚠️ WARNING: RELEASE_KEYSTORE_BASE64 secret is not configured in GitHub Secrets. Using fallback unsigned build."
+          fi
+
+      - name: 🛠️ Set up Android SDK & Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 🚀 Build Signed Release AAB and Signed Release APK
+        working-directory: ./android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew || true
+          
+          echo "Building Release AAB (for Google Play Store)..."
+          ./gradlew bundleRelease --stacktrace || gradle bundleRelease --stacktrace
+          
+          echo "Building Release APK (for Direct Phone Install)..."
+          ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
+
+      - name: 📦 Upload Google Play Store AAB (Play Store Release File)
+        uses: actions/upload-artifact@v4
+        with:
+          name: UbalKitchen-PlayStore-AAB
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: warn
+
+      - name: 📱 Upload Installable Release APK (Direct Phone Testing)
+        uses: actions/upload-artifact@v4
+        with:
+          name: UbalKitchen-Installable-APK
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+
+      - name: 🌟 Create GitHub Release (When Tag is Pushed)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
+          name: Ubal Kitchen Release ${{ github.ref_name }}
+          body: |
+            ## 🍲 Ubal Kitchen — Jo Ghar Mein Hai, Usi Se Kuch Naya!
+            
+            ### 📥 Download Files:
+            - **Google Play Store Release Bundle (`.aab`)**: Upload this file directly to Google Play Console.
+            - **Direct Install APK (`.apk`)**: Install directly on any Android phone for testing without Play Store.
+            
+            *Signed permanently with your repository release key.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
